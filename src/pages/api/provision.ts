@@ -79,7 +79,7 @@ function provisionRouter(data: ProvisioningData) {
         progress: 0,
         name: data.hostname
     }
-    const query = fetch("http://localhost:7201/provision", {
+    const query = fetch("http://tplink:7201/provision", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
