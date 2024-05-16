@@ -33,24 +33,13 @@ export default function handler(
             return res.status(400).json({error: "Not implemented"})
         }
     } else if (req.method === "DELETE") {
-        const device: ProvisioningDevice | string | string[] | undefined = req.query.device
-        if (device === "router") {
-            if (state.router.status === "idle") {
-                return res.status(400).json({error: "router not being provisioned"})
-            } else {
-                state.router = {status: "idle"}
-                return res.status(200).json(state)
-            }
-        } else if (device === "everything") {
-            if (state.cpe.status === "idle" && state.router.status === "idle") {
-                return res.status(400).json({error: "not being provisioned"})
-            } else {
-                state.cpe = {status: "idle"}
-                state.router = {status: "idle"}
-                return res.status(200).json(state)
-            }
-        } else {
-            return res.status(400).json({error: "invalid device"})
+        const device: ProvisioningDevice = req.query.device as ProvisioningDevice
+        try {
+            cancelProvisioning(device)
+            return res.status(200).json(state)
+        } catch (e) {
+            // @ts-ignore
+            return res.status(400).json({error: e.message ?? e})
         }
     }
     return res.status(400).json({error: "invalid method"})
@@ -75,6 +64,21 @@ setInterval(() => {
             state.router.progress += 0.01
     }
 }, 1000)
+
+function cancelProvisioning(device: ProvisioningDevice) {
+    const cpe = device === "cpe" || device === "everything"
+    const router = device === "router" || device === "everything"
+    if (cpe && state.cpe.status !== "provisioning") throw new Error("cpe not provisioning")
+    if (router && state.router.status !== "provisioning") throw new Error("router not provisioning")
+    if (router) {
+        fetch("http://tplink:7201/provision", {
+            method: "DELETE"
+        })
+    }
+    if (cpe) {
+        state.cpe = {status: "idle"}
+    }
+}
 
 function provisionRouter(data: ProvisioningData) {
     if (state.router.status !== "idle") throw new Error("router not idle")
