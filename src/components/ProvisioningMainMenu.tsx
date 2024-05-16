@@ -21,14 +21,14 @@ function useHover(): [boolean, {}] {
 
 const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioningState, clickHandler}: ProvisioningMainMenuProps) => {
     const {router, cpe} = provisioningState ?? {}
-    let routerStatus = "Provision router", cpeStatus = "Provision CPE"
+    let routerProgress = "Provision router", cpeProgress = "Provision CPE", routerStatus = false, cpeStatus = false
     if (router?.status === "provisioning") {
-        const routerProgress = (router.progress * 100).toFixed(0)
-        routerStatus = `Provisioning router for ${router.name}(${routerProgress}%)`
+        routerProgress = `Provisioning router for ${router.name}(${(router.progress * 100).toFixed(0)}%)`
+        routerStatus = true
     }
     if (cpe?.status === "provisioning") {
-        const cpeProgress = (cpe.progress * 100).toFixed(0)
-        routerStatus = `Provisioning router for ${cpe.name}(${cpeProgress}%)`
+        cpeProgress = `Provisioning router for ${cpe.name}(${((cpe.progress * 100).toFixed(0))}%)`
+        cpeStatus = true
     }
     const [everythingHovering, everythingHoverProps] = useHover()
     const [routerHovering, routerHoverProps] = useHover()
@@ -53,7 +53,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                             className="w-100"
                             {...routerHoverProps}
                             onClick={() => (routerStatus) ? clickHandler!("cancel", "router") : clickHandler!("provision","router")}
-                        >{(routerHovering ? "Cancel " : "") + routerStatus}</Button>
+                        >{(routerHovering ? "Cancel " : "") + routerProgress}</Button>
                     </Col>
                     <Col className="col-6">
                         <Button
@@ -62,7 +62,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                             disabled={true}
                             {...cpeHoverProps}
                             onClick={() => (cpeStatus) ? clickHandler!("cancel", "cpe") : clickHandler!("provision", "cpe")}
-                        >{(cpeHovering ? "Cancel " : "") + cpeStatus}</Button>
+                        >{(cpeHovering ? "Cancel " : "") + cpeProgress}</Button>
                     </Col>
                 </Row>
                 <Row className="w-100 align-items-center">
