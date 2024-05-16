@@ -97,7 +97,7 @@ const ProvisioningComponent: React.FC<ProvisioningComponentProps> = ({data}: Pro
     } else if (menu === 'matrix') {
         return (
             <>
-                <Alert variant={"warning"}>Matrix provisioning is not yet implemented</Alert>
+                <Alert variant={"warning"}>Matrix provisioning is not implemented</Alert>
                 <Button variant={"primary"} onClick={() => setMenu("main")}>Back</Button>
             </>
         )

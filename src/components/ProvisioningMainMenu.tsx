@@ -27,7 +27,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
         routerStatus = true
     }
     if (cpe?.status === "provisioning") {
-        cpeProgress = `Provisioning router for ${cpe.name}(${((cpe.progress * 100).toFixed(0))}%)`
+        cpeProgress = `Provisioning router for ${cpe.name} (${((cpe.progress * 100).toFixed(0))}%)`
         cpeStatus = true
     }
     const [everythingHovering, everythingHoverProps] = useHover()
@@ -53,7 +53,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                             className="w-100"
                             {...routerHoverProps}
                             onClick={() => (routerStatus) ? clickHandler!("cancel", "router") : clickHandler!("provision","router")}
-                        >{(routerHovering ? "Cancel " : "") + routerProgress}</Button>
+                        >{(routerHovering && routerStatus ? "Cancel " : "") + routerProgress}</Button>
                     </Col>
                     <Col className="col-6">
                         <Button
@@ -62,7 +62,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                             disabled={true}
                             {...cpeHoverProps}
                             onClick={() => (cpeStatus) ? clickHandler!("cancel", "cpe") : clickHandler!("provision", "cpe")}
-                        >{(cpeHovering ? "Cancel " : "") + cpeProgress}</Button>
+                        >{(cpeHovering && cpeStatus ? "Cancel " : "") + cpeProgress}</Button>
                     </Col>
                 </Row>
                 <Row className="w-100 align-items-center">
