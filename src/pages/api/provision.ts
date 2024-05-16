@@ -6,12 +6,16 @@ import {
     ProvisioningState,
     ProvisioningStateOrError
 } from "@/types";
+import {checkApiKey} from "@/checkApiKey";
 
 
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<ProvisioningStateOrError>
 ) {
+    if (!checkApiKey(req, res)) {
+        return
+    }
     if (req.method === 'POST') {
         const device: ProvisioningDevice | string | string[] | undefined = req.query.device
         const data = checkProvisioningData(req.body)

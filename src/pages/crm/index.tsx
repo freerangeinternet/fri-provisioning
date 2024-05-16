@@ -6,8 +6,11 @@ import {checkProvisioningData, ProvisioningData} from "@/types";
 import {Alert} from "react-bootstrap";
 import JSONDump from "@/components/JSONDump";
 
+export let apikey: string
+
 export default function Crm() {
     const router = useRouter()
+    apikey = router.query.apikey as string
     const data = checkProvisioningData(router.query)
     return (
         <>
@@ -17,7 +20,7 @@ export default function Crm() {
             <Container as="main">
                 {checkProvisioningData(data) ?
                     <>
-                        <ProvisioningComponent data={data as ProvisioningData}/>
+                        <ProvisioningComponent data={data as ProvisioningData} />
                     </> :
                     <>
                         <Alert variant={"danger"}>Invalid provisioning data</Alert>

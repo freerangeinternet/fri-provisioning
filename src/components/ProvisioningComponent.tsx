@@ -10,6 +10,7 @@ import {
 import {HTTP_METHOD} from "next/dist/server/web/http";
 import ProvisioningStatus from "@/components/ProvisioningStatus";
 import {SoundEffectPlayer} from "@/player";
+import {apikey} from "@/pages/crm";
 
 
 export type ProvisioningMainMenuAction = "provision" | "matrix" | "cancel"
@@ -119,16 +120,16 @@ async function _request(url: string, method: HTTP_METHOD, data?: any): Promise<P
 }
 
 export async function cancelProvisioning(device: ProvisioningDevice): Promise<ProvisioningStateOrError | ErrorMessage> {
-    return _request("/api/provision?device=" + device, "DELETE")
+    return _request("/api/provision?apikey=" + apikey + "&device=" + device, "DELETE")
 }
 
 async function requestProvisioning(data: ProvisioningData, device: ProvisioningDevice): Promise<ProvisioningStateOrError | ErrorMessage> {
     soundEffectPlayer.reset(device)
-    return _request("/api/provision?device=" + device, "POST", data)
+    return _request("/api/provision?apikey=" + apikey + "&device=" + device, "POST", data)
 }
 
 async function getProvisioningStatus(): Promise<ProvisioningStateOrError | ErrorMessage> {
-        return _request("/api/status", "GET")
+        return _request("/api/status?apikey=" + apikey, "GET")
 }
 
 export default ProvisioningComponent;

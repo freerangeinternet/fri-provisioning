@@ -1,11 +1,15 @@
 import type {NextApiRequest, NextApiResponse} from "next";
 import {ErrorMessage, ProvisioningDevice, ProvisioningStateOrError} from "@/types";
 import {state} from "@/pages/api/provision";
+import {checkApiKey} from "@/checkApiKey";
 
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<ProvisioningStateOrError | ErrorMessage>
 ) {
+    if (!checkApiKey(req, res)) {
+        return
+    }
     if (req.method === 'GET') {
         res.status(200).json(state)
     } else if (req.method === 'DELETE') {
