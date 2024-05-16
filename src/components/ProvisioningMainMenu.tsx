@@ -21,14 +21,14 @@ function useHover(): [boolean, {}] {
 
 const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioningState, clickHandler}: ProvisioningMainMenuProps) => {
     const {router, cpe} = provisioningState ?? {}
-    let routerStatus = false, cpeStatus = false, routerProgress = "", cpeProgress = ""
+    let routerStatus = "Provision router", cpeStatus = "Provision CPE"
     if (router?.status === "provisioning") {
-        routerStatus = true
-        routerProgress = (router.progress * 100).toFixed(0)
+        const routerProgress = (router.progress * 100).toFixed(0)
+        routerStatus = `Provisioning router for ${router.name}(${routerProgress}%)`
     }
     if (cpe?.status === "provisioning") {
-        cpeStatus = true
-        cpeProgress = (cpe.progress * 100).toFixed(0)
+        const cpeProgress = (cpe.progress * 100).toFixed(0)
+        routerStatus = `Provisioning router for ${cpe.name}(${cpeProgress}%)`
     }
     const [everythingHovering, everythingHoverProps] = useHover()
     const [routerHovering, routerHoverProps] = useHover()
@@ -53,7 +53,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                             className="w-100"
                             {...routerHoverProps}
                             onClick={() => (routerStatus) ? clickHandler!("cancel", "router") : clickHandler!("provision","router")}
-                        >{routerStatus ? (routerHovering ? "Cancel " : "") + "Router (" + routerProgress + "%)" : "Provision Router"}</Button>
+                        >{(routerHovering ? "Cancel " : "") + routerStatus}</Button>
                     </Col>
                     <Col className="col-6">
                         <Button
@@ -62,7 +62,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                             disabled={true}
                             {...cpeHoverProps}
                             onClick={() => (cpeStatus) ? clickHandler!("cancel", "cpe") : clickHandler!("provision", "cpe")}
-                        >{cpeStatus ? (cpeHovering ? "Cancel " : "") + "CPE (" + cpeProgress + "%)" : "Provision CPE"}</Button>
+                        >{(cpeHovering ? "Cancel " : "") + cpeStatus}</Button>
                     </Col>
                 </Row>
                 <Row className="w-100 align-items-center">
