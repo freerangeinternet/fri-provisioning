@@ -132,4 +132,8 @@ async function getProvisioningStatus(): Promise<ProvisioningStateOrError | Error
         return _request("/api/status?apikey=" + apikey, "GET")
 }
 
+export async function clearStatus(device: ProvisioningDevice): Promise<ProvisioningStateOrError | ErrorMessage> {
+    return _request("/api/status?apikey=" + apikey + "&device=" + device, "DELETE")
+}
+
 export default ProvisioningComponent;

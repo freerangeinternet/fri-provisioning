@@ -1,6 +1,6 @@
 import {CPEProvisioningState, ProvisioningState, ProvisioningStateOrError, RouterProvisioningState} from "@/types";
 import {Alert} from "react-bootstrap";
-import {cancelProvisioning} from "@/components/ProvisioningComponent";
+import {clearStatus} from "@/components/ProvisioningComponent";
 
 interface ProvisioningStatusProps {
     provisioningState?: ProvisioningState
@@ -10,10 +10,10 @@ interface ProvisioningStatusProps {
 const ProvisioningStatus: React.FC<ProvisioningStatusProps> = ({provisioningState, setProvisioningState}: ProvisioningStatusProps) => {
     let {router, cpe} = provisioningState!
     const clearRouter = () => {
-        cancelProvisioning("router").then(s =>  setProvisioningState!(s))
+        clearStatus("router").then(s =>  setProvisioningState!(s))
     }
     const clearCPE = () => {
-        cancelProvisioning("cpe").then(s =>  setProvisioningState!(s))
+        clearStatus("cpe").then(s =>  setProvisioningState!(s))
     }
 
     return [getPopup(router, clearRouter), getPopup(cpe, clearCPE)]

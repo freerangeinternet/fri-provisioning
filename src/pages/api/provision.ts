@@ -36,7 +36,7 @@ export default function handler(
         const device: ProvisioningDevice = req.query.device as ProvisioningDevice
         try {
             cancelProvisioning(device)
-            return res.status(200).json(state)
+            return res.status(202).json(state)
         } catch (e) {
             // @ts-ignore
             return res.status(400).json({error: e.message ?? e})
