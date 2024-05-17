@@ -61,6 +61,10 @@ export function checkProvisioningData(data: ProvisioningData | any): Provisionin
         return false
     if (typeof data.hostname !== 'string')
         return false
+    data.hostname = data.hostname.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (!/^[a-zA-Z0-9]([\-_a-zA-Z0-9]*[a-zA-Z0-9])?$/.test(data.hostname)) {
+        return false
+    }
     if (typeof data.ssid !== 'string')
         return false
     if (typeof data.psk !== 'string')
