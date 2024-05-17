@@ -1,4 +1,10 @@
-import {CPEProvisioningState, ProvisioningState, ProvisioningStateOrError, RouterProvisioningState} from "@/types";
+import {
+    CPEProvisioningState,
+    ProvisioningState,
+    ProvisioningStateError,
+    ProvisioningStateOrError,
+    RouterProvisioningState
+} from "@/types";
 import {Alert} from "react-bootstrap";
 import {clearStatus} from "@/components/ProvisioningComponent";
 
@@ -28,7 +34,7 @@ function getPopup(state: CPEProvisioningState | RouterProvisioningState, clearCa
                     {success ?
                         <>Router provisioned for <strong>{state.name}</strong></> :
                         <>Error provisioning router for <strong>{state.name}</strong>
-                            <div dangerouslySetInnerHTML={{__html: state.error}}></div>
+                            {renderError(state.error)}
                         </>
                     }
                     <button type={"button"} className={"btn-close"} data-bs-dismiss={"alert"} aria-label={"Close"}
@@ -38,6 +44,15 @@ function getPopup(state: CPEProvisioningState | RouterProvisioningState, clearCa
         )
     }
     return <></>
+}
+
+function renderError(error: ProvisioningStateError) {
+    if (typeof error === 'string') return <>{error}</>
+    else if (error.screenshot) return <>
+        <pre>{error.error}</pre>
+        <img width='100%' src={'data:image/png;base64,' + error.screenshot}></img>
+    </>
+    else return <><pre>{error.error}</pre></>
 }
 
 export default ProvisioningStatus;

@@ -102,9 +102,11 @@ function provisionRouter(data: ProvisioningData) {
                 name: data.hostname
             }
         else {
+            const contentType = result.headers.get("content-type");
+            const error = contentType && contentType.includes("json") ? await result.json() : await result.text()
             state.router = {
                 status: "error",
-                error: await result.text(),
+                error,
                 name: data.hostname,
             }
         }

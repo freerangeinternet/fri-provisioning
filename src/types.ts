@@ -22,8 +22,10 @@ export type CPEProvisioningState = {
 } | {
     status: "error"
     name: string
-    error: string
+    error: ProvisioningStateError
 }
+
+export type ProvisioningStateError = string | { error: string, screenshot?: string }
 
 export type RouterProvisioningState = CPEProvisioningState
 export type ProvisioningDevice = "everything" | "router" | "cpe"
