@@ -23,7 +23,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
     const {router, cpe} = provisioningState ?? {}
     let routerProgress = "Provision router", cpeProgress = "Provision CPE", routerStatus = false, cpeStatus = false
     if (router?.status === "provisioning") {
-        routerProgress = `Provisioning router for ${router.name}(${(router.progress * 100).toFixed(0)}%)`
+        routerProgress = `Provisioning router for ${router.name} (${(router.progress * 100).toFixed(0)}%)`
         routerStatus = true
     }
     if (cpe?.status === "provisioning") {
