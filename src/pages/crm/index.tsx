@@ -18,13 +18,13 @@ export default function Crm() {
                 <title>FRI-Provisioning CRM module</title>
             </Head>
             <Container as="main">
-                {checkProvisioningData(data) ?
+                {data ?
                     <>
                         <ProvisioningComponent data={data as ProvisioningData} />
                     </> :
                     <>
                         <Alert variant={"danger"}>Invalid provisioning data</Alert>
-                        <JSONDump json={data}/>
+                        <JSONDump json={router.query}/>
                     </>
                 }
             </Container>
