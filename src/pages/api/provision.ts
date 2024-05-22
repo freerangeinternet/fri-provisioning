@@ -58,12 +58,6 @@ export let state: ProvisioningState = {
 let _provisioningData: ProvisioningData | undefined
 
 const tplinkSocket = io(process.env.TPLINK_URL!)
-tplinkSocket.on("connect", () => {
-    console.log("tplink socket.io connected")
-})
-tplinkSocket.on("disconnect", () => {
-    console.log("tplink socket.io disconnected")
-})
 tplinkSocket.on("status", (data) => {
     let name = state.router.status === "idle" ? "unknown" : state.router.name
     if (data.error) {
