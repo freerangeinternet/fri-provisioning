@@ -54,6 +54,16 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                 </Row>
                 <Row className="w-100 align-items-center mb-3">
                     <Col className="col-6">
+                        <div>{routerProgress}</div>
+                        <div>{routerMessage}</div>
+                    </Col>
+                    <Col className="col-6">
+                        <div>{cpeProgress}</div>
+                        <div>{cpeMessage}</div>
+                    </Col>
+                </Row>
+                <Row className="w-100 align-items-center mb-3">
+                    <Col className="col-6">
                         <Button
                             variant={labelStatus === "success" ? "success": "secondary"}
                             className="w-100"
@@ -68,16 +78,6 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                             disabled={labelStatus === "requested"}
                             onClick={() => clickHandler!("label", "cpe")}
                         >Print CPE labels</Button>
-                    </Col>
-                </Row>
-                <Row className="w-100 align-items-center mb-3">
-                    <Col className="col-6">
-                        <div>{routerProgress}</div>
-                        <div>{routerMessage}</div>
-                    </Col>
-                    <Col className="col-6">
-                        <div>{cpeProgress}</div>
-                        <div>{cpeMessage}</div>
                     </Col>
                 </Row>
                 <Row className="w-100 align-items-center">
