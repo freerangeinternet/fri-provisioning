@@ -16,6 +16,7 @@ export type CPEProvisioningState = {
     status: "provisioning"
     name: string
     progress: number
+    message: string
 } | {
     status: "success"
     name: string

@@ -7,6 +7,7 @@ import {
     ProvisioningStateOrError
 } from "@/types";
 import {checkApiKey} from "@/checkApiKey";
+import {io} from "socket.io-client";
 
 
 export default function handler(
@@ -53,17 +54,29 @@ export let state: ProvisioningState = {
         status: "idle"
     }
 }
-
-setInterval(() => {
-    if (state.cpe.status === "provisioning") {
-        if (state.cpe.progress < 0.99)
-            state.cpe.progress += 0.01
+const tplinkSocket = io("wss://tplink:7201")
+tplinkSocket.on("status", (data) => {
+    let name = state.router.status === "idle" ? "unknown" : state.router.name
+    if (data.error) {
+        state.router = {
+            status: "error",
+            name,
+            error: {error: data.error, screenshot: data.screenshot},
+        }
+    } else if (data.progress === 100) {
+        state.router = {
+            status: "success",
+            name,
+        }
+    } else {
+        state.router = {
+            status: "provisioning",
+            name,
+            progress: data.progress,
+            message: data.status,
+        }
     }
-    if (state.router.status === "provisioning") {
-        if (state.router.progress < 0.99)
-            state.router.progress += 0.01
-    }
-}, 1000)
+})
 
 function cancelProvisioning(device: ProvisioningDevice) {
     const cpe = device === "cpe" || device === "everything"
@@ -85,7 +98,8 @@ function provisionRouter(data: ProvisioningData) {
     state.router = {
         status: "provisioning",
         progress: 0,
-        name: data.hostname
+        name: data.hostname,
+        message: "waiting for response",
     }
     const query = fetch("http://tplink:7201/provision", {
         method: "POST",
