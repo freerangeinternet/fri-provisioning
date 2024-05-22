@@ -54,7 +54,7 @@ export let state: ProvisioningState = {
         status: "idle"
     }
 }
-const tplinkSocket = io("wss://tplink:7201")
+const tplinkSocket = io(process.env.TPLINK_URL!)
 tplinkSocket.on("connect", () => {
     console.log("tplink socket.io connected")
 })
@@ -90,7 +90,7 @@ function cancelProvisioning(device: ProvisioningDevice) {
     if (cpe && state.cpe.status !== "provisioning") throw new Error("cpe not provisioning")
     if (router && state.router.status !== "provisioning") throw new Error("router not provisioning")
     if (router) {
-        fetch("http://tplink:7201/provision", {
+        fetch(process.env.TPLINK_URL + "/provision", {
             method: "DELETE"
         })
     }
@@ -107,7 +107,7 @@ function provisionRouter(data: ProvisioningData) {
         name: data.hostname,
         message: "waiting for response",
     }
-    const query = fetch("http://tplink:7201/provision", {
+    const query = fetch(process.env.TPLINK_URL + "/provision", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

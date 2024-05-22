@@ -13,6 +13,7 @@ RUN npm install
 RUN npm test
 
 ENV PORT_WEBAPP=7200
+ENV TPLINK_URL=http://tplink:7201
 # Make port 7200 available to the world outside this container
 EXPOSE ${PORT_WEBAPP}
 
