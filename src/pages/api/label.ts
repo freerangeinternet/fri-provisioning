@@ -16,7 +16,9 @@ export async function printLabel(data: ProvisioningData, types: { [key in LabelT
         params.psk = data.psk
     }
     if (types.owner) {
-        params.phone = parsePhoneNumber(data.phone, "US")?.formatNational() ?? data.phone
+        params.text = data.displayname + "\n"
+        params.text += data.address + "\n"
+        params.text += parsePhoneNumber(data.phone, "US")?.formatNational() ?? data.phone
     }
     if (!params) throw new Error("no label types requested")
     const url = process.env["LABEL_URL"] + "/label?" + new URLSearchParams(params).toString()
