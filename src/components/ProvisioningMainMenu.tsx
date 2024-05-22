@@ -21,48 +21,54 @@ function useHover(): [boolean, {}] {
 
 const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioningState, clickHandler}: ProvisioningMainMenuProps) => {
     const {router, cpe} = provisioningState ?? {}
-    let routerProgress = "Provision router", cpeProgress = "Provision CPE", routerStatus = false, cpeStatus = false
+    let routerProgress = "", cpeProgress = "", routerMessage = "", cpeMessage = "", routerStatus = false, cpeStatus = false
     if (router?.status === "provisioning") {
-        routerProgress = `Provisioning router for ${router.name} (${(router.progress * 100).toFixed(0)}%)`
+        routerProgress = `Provisioning router for ${router.name} (${(router.progress).toFixed(0)}%)`
+        routerMessage = router.message
         routerStatus = true
     }
     if (cpe?.status === "provisioning") {
-        cpeProgress = `Provisioning router for ${cpe.name} (${((cpe.progress * 100).toFixed(0))}%)`
+        cpeProgress = `Provisioning router for ${cpe.name} (${((cpe.progress).toFixed(0))}%)`
+        cpeMessage = cpe.message
         cpeStatus = true
     }
-    const [everythingHovering, everythingHoverProps] = useHover()
-    const [routerHovering, routerHoverProps] = useHover()
-    const [cpeHovering, cpeHoverProps] = useHover()
     return (
         <>
             <Container as="main">
-                <Row className="w-100 align-items-center mb-5">
+                <Row className="w-100 align-items-center mb-3">
                     <Col className="col-12">
                         <Button variant={routerStatus || cpeStatus ? "danger" : "warning"}
                                 className="w-100"
-                                {...everythingHoverProps}
                                 disabled={true}
                                 onClick={() => (routerStatus || cpeStatus) ? clickHandler!("cancel", "everything") : clickHandler!("provision", "everything")}
-                        >{(routerStatus || cpeStatus) ? (everythingHovering) ? "Cancel" : "Provisioning in progress" : "Provision Everything"}</Button>
+                        >{(routerStatus || cpeStatus) ? "Cancel everything" : "Provision Everything"}</Button>
                     </Col>
                 </Row>
-                <Row className="w-100 align-items-center mb-5">
+                <Row className="w-100 align-items-center mb-3">
                     <Col className="col-6">
                         <Button
                             variant={routerStatus ? 'danger' : 'primary'}
                             className="w-100"
-                            {...routerHoverProps}
                             onClick={() => (routerStatus) ? clickHandler!("cancel", "router") : clickHandler!("provision","router")}
-                        >{(routerHovering && routerStatus ? "Cancel " : "") + routerProgress}</Button>
+                        >{(routerStatus ? "Cancel Router" : "Provision Router")}</Button>
                     </Col>
                     <Col className="col-6">
                         <Button
                             variant={cpeStatus ? "danger" : "primary"}
                             className="w-100"
                             disabled={true}
-                            {...cpeHoverProps}
                             onClick={() => (cpeStatus) ? clickHandler!("cancel", "cpe") : clickHandler!("provision", "cpe")}
-                        >{(cpeHovering && cpeStatus ? "Cancel " : "") + cpeProgress}</Button>
+                        >{(cpeStatus ? "Cancel CPE" : "Provision CPE")}</Button>
+                    </Col>
+                </Row>
+                <Row className="w-100 align-items-center mb-3">
+                    <Col className="col-6">
+                        <div>{routerProgress}</div>
+                        <div>{routerMessage}</div>
+                    </Col>
+                    <Col className="col-6">
+                        <div>{cpeProgress}</div>
+                        <div>{cpeMessage}</div>
                     </Col>
                 </Row>
                 <Row className="w-100 align-items-center">

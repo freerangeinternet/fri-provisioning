@@ -74,7 +74,7 @@ tplinkSocket.on("status", (data) => {
             status: "success",
             name,
         }
-    } else {
+    } else if (data.progress !== undefined) {
         state.router = {
             status: "provisioning",
             name,
