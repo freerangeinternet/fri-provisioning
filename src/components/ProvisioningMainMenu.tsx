@@ -1,25 +1,16 @@
 import {Button, Row} from "react-bootstrap";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
-import {ProvisioningMainMenuAction} from "@/components/ProvisioningComponent";
-import {useState} from "react";
+import {LabelStatus, ProvisioningMainMenuAction} from "@/components/ProvisioningComponent";
 import {ProvisioningDevice, ProvisioningState} from "@/types";
 
 interface ProvisioningMainMenuProps {
     provisioningState?: ProvisioningState
     clickHandler?: (action: ProvisioningMainMenuAction, device: ProvisioningDevice | null) => void
+    labelStatus?: LabelStatus
 }
 
-function useHover(): [boolean, {}] {
-    const [hovering, setHovering] = useState(false)
-    const onHoverProps = {
-        onMouseEnter: () => setHovering(true),
-        onMouseLeave: () => setHovering(false),
-    }
-    return [hovering, onHoverProps]
-}
-
-const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioningState, clickHandler}: ProvisioningMainMenuProps) => {
+const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioningState, clickHandler, labelStatus}: ProvisioningMainMenuProps) => {
     const {router, cpe} = provisioningState ?? {}
     let routerProgress = "", cpeProgress = "", routerMessage = "", cpeMessage = "", routerStatus = false, cpeStatus = false
     if (router?.status === "provisioning") {
@@ -59,6 +50,24 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                             disabled={true}
                             onClick={() => (cpeStatus) ? clickHandler!("cancel", "cpe") : clickHandler!("provision", "cpe")}
                         >{(cpeStatus ? "Cancel CPE" : "Provision CPE")}</Button>
+                    </Col>
+                </Row>
+                <Row className="w-100 align-items-center mb-3">
+                    <Col className="col-6">
+                        <Button
+                            variant={labelStatus === "success" ? "success": "secondary"}
+                            className="w-100"
+                            disabled={labelStatus === "requested"}
+                            onClick={() => clickHandler!("label","router")}
+                        >Print Router labels</Button>
+                    </Col>
+                    <Col className="col-6">
+                        <Button
+                            variant={labelStatus === "success" ? "success": "secondary"}
+                            className="w-100"
+                            disabled={labelStatus === "requested"}
+                            onClick={() => clickHandler!("label", "cpe")}
+                        >Print CPE labels</Button>
                     </Col>
                 </Row>
                 <Row className="w-100 align-items-center mb-3">

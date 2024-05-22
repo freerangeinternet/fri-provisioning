@@ -6,6 +6,9 @@ export type ProvisioningState = {
 export type ErrorMessage = {
     error: string
 }
+export type StatusMessage = {
+    status: string
+}
 export const isErrorMessage = (state?: ProvisioningStateOrError): state is ErrorMessage => {
     return state !== undefined && (state as ErrorMessage).error !== undefined;
 };
@@ -36,6 +39,8 @@ export type ProvisioningData = {
     lon: number
     plan: string
     hostname: string
+    displayname: string
+    phone: string
     ssid: string
     psk: string
 }
@@ -66,6 +71,10 @@ export function checkProvisioningData(data: ProvisioningData | any): Provisionin
     if (!/^[a-zA-Z0-9]([\-_a-zA-Z0-9]*[a-zA-Z0-9])?$/.test(data.hostname)) {
         return false
     }
+    if (typeof data.displayname !== 'string')
+        return false
+    if (typeof data.phone !== 'string')
+        return false
     if (typeof data.ssid !== 'string')
         return false
     if (typeof data.psk !== 'string')

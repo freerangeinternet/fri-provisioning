@@ -8,6 +8,7 @@ import {
 } from "@/types";
 import {checkApiKey} from "@/checkApiKey";
 import {io} from "socket.io-client";
+import {printLabel} from "@/pages/api/label";
 
 
 export default function handler(
@@ -54,6 +55,8 @@ export let state: ProvisioningState = {
         status: "idle"
     }
 }
+let _provisioningData: ProvisioningData | undefined
+
 const tplinkSocket = io(process.env.TPLINK_URL!)
 tplinkSocket.on("connect", () => {
     console.log("tplink socket.io connected")
@@ -74,6 +77,9 @@ tplinkSocket.on("status", (data) => {
             status: "success",
             name,
         }
+        if (_provisioningData !== undefined)
+            printLabel(_provisioningData, {owner: true, wifi: true})
+        _provisioningData = undefined
     } else if (data.progress !== undefined) {
         state.router = {
             status: "provisioning",
@@ -114,14 +120,17 @@ function provisionRouter(data: ProvisioningData) {
         },
         body: JSON.stringify(data)
     })
+    _provisioningData = data
     query.then(async (result) => {
         if (result.status === 202) {}
-        else if (result.status < 400)
+        else if (result.status < 400) {
             state.router = {
                 status: "success",
                 name: data.hostname
             }
-        else {
+            printLabel(data, {wifi: true, owner: true})
+            _provisioningData = undefined
+        } else {
             const contentType = result.headers.get("content-type");
             const error = contentType && contentType.includes("json") ? await result.json() : await result.text()
             state.router = {
