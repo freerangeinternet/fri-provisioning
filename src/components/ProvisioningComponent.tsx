@@ -87,7 +87,6 @@ const ProvisioningComponent: React.FC<ProvisioningComponentProps> = ({data}: Pro
                 } else {
                     setProvisioningState(state)
                 }
-                console.log(state)
             } else if (action === "label") {
                 if (labelStatus === "requested") return
                 setLabelStatus("requested")

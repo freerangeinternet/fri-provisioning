@@ -22,7 +22,6 @@ export async function printLabel(data: ProvisioningData, types: { [key in LabelT
     }
     if (!params) throw new Error("no label types requested")
     const url = process.env["LABEL_URL"] + "/label?" + new URLSearchParams(params).toString()
-    console.log(url)
     const res = await fetch(url)
     if (res.status >= 400) throw new Error(await res.text())
 }
