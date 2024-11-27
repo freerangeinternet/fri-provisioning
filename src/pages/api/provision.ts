@@ -20,13 +20,14 @@ export default function handler(
     }
     if (req.method === 'POST') {
         const device: ProvisioningDevice | string | string[] | undefined = req.query.device
+        const callbackURL: string | undefined = req.query.callbackURL as string | undefined
         const data = checkProvisioningData(req.body)
         if (!data) {
             return res.status(400).json({error: "invalid input data"})
         }
-        if (device === "router") {
+        if (device === "router" || device === "everything") {
             if (state.router.status === "idle") {
-                provisionRouter(data)
+                provisionRouter(data, callbackURL)
                 return res.status(200).json(state)
             } else {
                 return res.status(400).json({error: "router provisioning not idle"})
@@ -99,7 +100,7 @@ function cancelProvisioning(device: ProvisioningDevice) {
     }
 }
 
-function provisionRouter(data: ProvisioningData) {
+function provisionRouter(data: ProvisioningData, callbackURL: string | undefined) {
     if (state.router.status !== "idle") throw new Error("router not idle")
     state.router = {
         status: "provisioning",
@@ -107,7 +108,7 @@ function provisionRouter(data: ProvisioningData) {
         name: data.hostname,
         message: "waiting for response",
     }
-    const query = fetch(process.env.TPLINK_URL + "/provision", {
+    const query = fetch(process.env.TPLINK_URL + "/provision?" + new URLSearchParams({callbackURL} as Record<string, string>), {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
