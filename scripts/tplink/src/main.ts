@@ -6,6 +6,9 @@ import {hideBin} from 'yargs/helpers';
 
 
 let cancelProvisioning = false
+process.on('SIGINT', () => {
+    cancelProvisioning = true
+})
 export const assertNotCancelled = () => {
     if (cancelProvisioning) {
         cancelProvisioning = false
@@ -78,6 +81,7 @@ setupTPLink({
 }).then(result => {
     if (result === true) {
         status("Success", 100)
+        process.exit(0)
     } else {
         const {error, screenshot} = result
         statusError(error || error, screenshot)

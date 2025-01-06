@@ -64,7 +64,7 @@ function cancelProvisioning(device: ProvisioningDevice) {
     if (cpe && state.cpe.status !== "provisioning") throw new Error("cpe not provisioning")
     if (router && state.router.status !== "provisioning") throw new Error("router not provisioning")
     if (router) {
-        _provisioningProcess?.kill("SIGKILL")
+        _provisioningProcess?.kill("SIGINT")
     }
     if (cpe) {
         state.cpe = {status: "idle"}
@@ -77,7 +77,7 @@ function provisionRouter(data: ProvisioningData) {
         status: "provisioning",
         progress: 0,
         name: data.hostname,
-        message: "waiting for response",
+        message: "Starting process...",
     }
     _provisioningProcess = spawn('npm', ['start', data.hostname, data.ssid, data.psk], {
         cwd: process.cwd() + '/scripts/tplink'
@@ -108,19 +108,19 @@ function provisionRouter(data: ProvisioningData) {
             console.error(e.message || e)
         }
     })
-    rl.on('close', (code: number) => {
+    _provisioningProcess.on('close', (code: number, signal: string | null) => {
         if (state.router.status === 'provisioning') {
             if (code === 0) {
                 state.router = {
                     status: "success",
                     name: state.router.name
                 }
-                printLabel(data, {wifi: true, owner: true})
+                printLabel(data, { wifi: true, owner: true })
             } else {
                 state.router = {
                     status: "error",
                     name: state.router.name,
-                    error: "unknown error: " + code
+                    error: `unknown error: ${code}${signal ? `, signal: ${signal}` : ''}`
                 }
             }
         }

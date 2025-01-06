@@ -11,15 +11,11 @@ type Params = {
     psk: string,
 }
 
-let browser: Browser;
 const DEBUG = process.env.DEBUG ?? false
 
 export async function setupTPLink(params: Params): Promise<true | { error: any, screenshot?: Buffer }> {
     status("Opening browser")
-    if (browser && browser.isConnected()) {
-        await browser.close()
-    }
-    browser = await chromium.launch({headless: !DEBUG})
+    const browser = await chromium.launch({headless: !DEBUG})
     const page = await browser.newPage({viewport: {width: 1280, height: 1280}})
     page.setDefaultTimeout(30e3)
     status("Connecting to router", 1)
@@ -88,7 +84,7 @@ export async function setupTPLink(params: Params): Promise<true | { error: any, 
         return {error, screenshot}
     } finally {
         if (!DEBUG)
-            browser.close()
+            await browser.close()
     }
 }
 
@@ -251,12 +247,12 @@ async function setWiFi(page: Page, ssid: string, psk: string) {
     await page.click(".ml2 > a[url='wirelessSettings.htm']")
     await sleep(1)
     if (await page.isVisible("#enableOfdma")) {
-        status("Enable OFDMA", 50)
-        await toggleRadioButtonTo(page, "enableOfdma", true)
+        status("Disable OFDMA", 50)
+        await toggleRadioButtonTo(page, "enableOfdma", false)
     }
     if (await page.isVisible("#enableTwt")) {
-        status("Enable TWT", 60)
-        await toggleRadioButtonTo(page, "enableTwt", true)
+        status("Disable TWT", 60)
+        await toggleRadioButtonTo(page, "enableTwt", false)
     }
     status("Set SSID & PSK", 70)
     await page.fill("#ssid", ssid)
