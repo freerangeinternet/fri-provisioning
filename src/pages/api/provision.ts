@@ -64,7 +64,7 @@ function cancelProvisioning(device: ProvisioningDevice) {
     if (cpe && state.cpe.status !== "provisioning") throw new Error("cpe not provisioning")
     if (router && state.router.status !== "provisioning") throw new Error("router not provisioning")
     if (router) {
-        _provisioningProcess?.kill("SIGINT")
+        _provisioningProcess?.kill("SIGTERM")
     }
     if (cpe) {
         state.cpe = {status: "idle"}
@@ -109,6 +109,7 @@ function provisionRouter(data: ProvisioningData) {
         }
     })
     _provisioningProcess.on('close', (code: number, signal: string | null) => {
+        _provisioningProcess = undefined
         if (state.router.status === 'provisioning') {
             if (code === 0) {
                 state.router = {

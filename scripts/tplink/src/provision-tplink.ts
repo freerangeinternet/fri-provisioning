@@ -191,11 +191,15 @@ async function upgrade(page: Page) {
         await sleep(1)
         await page.isVisible(".T_wait_upgrade")
         status("Rebooting", 38)
-        await new Promise<void>((resolve, _) => {
+        await Promise.race([new Promise<void>((resolve, _) => {
             page.on("load", () => {
                 resolve();
             })
-        })
+        }), new Promise<void>((res) => {
+            setTimeout(() => {
+                res();
+            }, 90000)
+        })]);
         return true
     }
     await toggleRadioButtonTo(page, "div_autoUpgradeBtn", true)
