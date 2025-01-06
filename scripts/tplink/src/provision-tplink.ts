@@ -195,11 +195,7 @@ async function upgrade(page: Page) {
             page.on("load", () => {
                 resolve();
             })
-        }), new Promise<void>((res) => {
-            setTimeout(() => {
-                res();
-            }, 90000)
-        })]);
+        }), sleep(180)]);
         return true
     }
     await toggleRadioButtonTo(page, "div_autoUpgradeBtn", true)
