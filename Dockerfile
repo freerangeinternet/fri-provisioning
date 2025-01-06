@@ -1,5 +1,4 @@
-# Use an official Node.js runtime as a parent image
-FROM node:22
+FROM mcr.microsoft.com/playwright:v1.44.0-jammy
 
 # Set the working directory
 WORKDIR /usr/src/app
