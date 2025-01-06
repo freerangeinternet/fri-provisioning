@@ -6,10 +6,6 @@ import {hideBin} from 'yargs/helpers';
 
 
 let cancelProvisioning = false
-process.on('SIGTERM', () => {
-    console.error("SIGTERM")
-    process.exit(5)
-})
 export const assertNotCancelled = () => {
     if (cancelProvisioning) {
         cancelProvisioning = false
