@@ -7,8 +7,7 @@ const nextConfig = {
       config.devtool = 'source-map'
     }
     return config
-  },
-  exclude: ['scripts']
+  }
 }
 
 module.exports = nextConfig
