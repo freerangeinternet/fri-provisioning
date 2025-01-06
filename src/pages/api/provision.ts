@@ -7,8 +7,9 @@ import {
     ProvisioningStateOrError
 } from "@/types";
 import {checkApiKey} from "@/checkApiKey";
-import {io} from "socket.io-client";
 import {printLabel} from "@/pages/api/label";
+import {ChildProcessWithoutNullStreams, spawn} from "node:child_process";
+import * as readline from "node:readline";
 
 
 export default function handler(
@@ -20,14 +21,13 @@ export default function handler(
     }
     if (req.method === 'POST') {
         const device: ProvisioningDevice | string | string[] | undefined = req.query.device
-        const callbackURL: string | undefined = req.query.callbackURL as string | undefined
         const data = checkProvisioningData(req.body)
         if (!data) {
             return res.status(400).json({error: "invalid input data"})
         }
         if (device === "router" || device === "everything") {
             if (state.router.status === "idle") {
-                provisionRouter(data, callbackURL)
+                provisionRouter(data)
                 return res.status(200).json(state)
             } else {
                 return res.status(400).json({error: "router provisioning not idle"})
@@ -56,34 +56,7 @@ export let state: ProvisioningState = {
         status: "idle"
     }
 }
-let _provisioningData: ProvisioningData | undefined
-
-const tplinkSocket = io(process.env.TPLINK_URL!)
-tplinkSocket.on("status", (data) => {
-    let name = state.router.status === "idle" ? "unknown" : state.router.name
-    if (data.error) {
-        state.router = {
-            status: "error",
-            name,
-            error: {error: data.error, screenshot: data.screenshot},
-        }
-    } else if (data.progress === 100) {
-        state.router = {
-            status: "success",
-            name,
-        }
-        if (_provisioningData !== undefined)
-            printLabel(_provisioningData, {owner: true, wifi: true})
-        _provisioningData = undefined
-    } else if (data.progress !== undefined) {
-        state.router = {
-            status: "provisioning",
-            name,
-            progress: data.progress,
-            message: data.status,
-        }
-    }
-})
+let _provisioningProcess: ChildProcessWithoutNullStreams | undefined
 
 function cancelProvisioning(device: ProvisioningDevice) {
     const cpe = device === "cpe" || device === "everything"
@@ -91,16 +64,14 @@ function cancelProvisioning(device: ProvisioningDevice) {
     if (cpe && state.cpe.status !== "provisioning") throw new Error("cpe not provisioning")
     if (router && state.router.status !== "provisioning") throw new Error("router not provisioning")
     if (router) {
-        fetch(process.env.TPLINK_URL + "/provision", {
-            method: "DELETE"
-        })
+        _provisioningProcess?.kill("SIGKILL")
     }
     if (cpe) {
         state.cpe = {status: "idle"}
     }
 }
 
-function provisionRouter(data: ProvisioningData, callbackURL: string | undefined) {
+function provisionRouter(data: ProvisioningData) {
     if (state.router.status !== "idle") throw new Error("router not idle")
     state.router = {
         status: "provisioning",
@@ -108,38 +79,50 @@ function provisionRouter(data: ProvisioningData, callbackURL: string | undefined
         name: data.hostname,
         message: "waiting for response",
     }
-    const query = fetch(process.env.TPLINK_URL + "/provision?" + new URLSearchParams({callbackURL} as Record<string, string>), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
+    _provisioningProcess = spawn('npm', ['start', data.hostname, data.ssid, data.psk], {
+        cwd: process.cwd() + '/scripts/tplink'
     })
-    _provisioningData = data
-    query.then(async (result) => {
-        if (result.status === 202) {}
-        else if (result.status < 400) {
-            state.router = {
-                status: "success",
-                name: data.hostname
+    _provisioningProcess.stderr.pipe(process.stderr);
+    const rl = readline.createInterface({
+        input: _provisioningProcess.stdout,
+        crlfDelay: Infinity,
+    });
+    let i = 0;
+    rl.on('line', (line) => {
+        if (i++ < 4) return
+        try {
+            if (state.router.status === "provisioning") {
+                const data = JSON.parse(line)
+                const {progress, status, error, screenshot} = data
+                if (progress !== undefined) state.router.progress = progress
+                if (status !== undefined) state.router.message = status
+                if (error !== undefined) state.router = {
+                    status: "error",
+                    name: state.router.name,
+                    error: {error, screenshot},
+                }
             }
-            printLabel(data, {wifi: true, owner: true})
-            _provisioningData = undefined
-        } else {
-            const contentType = result.headers.get("content-type");
-            const error = contentType && contentType.includes("json") ? await result.json() : await result.text()
-            state.router = {
-                status: "error",
-                error,
-                name: data.hostname,
+        } catch (e) {
+            console.error("Cannot JSON.parse() tplink process output:", "'" + line + "'")
+            // @ts-ignore
+            console.error(e.message || e)
+        }
+    })
+    rl.on('close', (code: number) => {
+        if (state.router.status === 'provisioning') {
+            if (code === 0) {
+                state.router = {
+                    status: "success",
+                    name: state.router.name
+                }
+                printLabel(data, {wifi: true, owner: true})
+            } else {
+                state.router = {
+                    status: "error",
+                    name: state.router.name,
+                    error: "unknown error: " + code
+                }
             }
         }
-        }, (error) => {
-            state.router = {
-                status: "error",
-                error: error.message || error,
-                name: data.hostname,
-            }
-        }
-    )
+    })
 }
