@@ -12,8 +12,11 @@ RUN npm install
 # catch any ts errors now
 RUN npm test
 
+WORKDIR /usr/src/app/scripts/tplink
+RUN npm install
+WORKDIR /usr/src/app
+
 ENV PORT_WEBAPP=7200
-ENV TPLINK_URL=http://tplink:7201
 ENV LABEL_URL=http://label:7210
 # Make port 7200 available to the world outside this container
 EXPOSE ${PORT_WEBAPP}
