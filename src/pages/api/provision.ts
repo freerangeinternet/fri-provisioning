@@ -10,6 +10,7 @@ import {checkApiKey} from "@/checkApiKey";
 import {printLabel} from "@/pages/api/label";
 import {ChildProcessWithoutNullStreams, spawn} from "node:child_process";
 import * as readline from "node:readline";
+import * as os from "node:os";
 
 
 export default function handler(
@@ -143,7 +144,7 @@ function provisionCPE(data: ProvisioningData) {
         name: data.hostname,
         message: "Starting process...",
     }
-    _cpeProcess = spawn('/root/.local/bin/poetry', ['run', 'python', 'main.py', data.hostname, data.lat + "", data.lon + ""], {
+    _cpeProcess = spawn(os.homedir() + '/.local/bin/poetry', ['run', 'python', 'main.py', data.hostname, data.lat + "", data.lon + ""], {
         cwd: process.cwd() + '/scripts/ltu'
     })
     _cpeProcess.stderr.pipe(process.stderr);
