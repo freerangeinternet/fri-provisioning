@@ -19,7 +19,7 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
         routerStatus = true
     }
     if (cpe?.status === "provisioning") {
-        cpeProgress = `Provisioning router for ${cpe.name} (${((cpe.progress).toFixed(0))}%)`
+        cpeProgress = `Provisioning cpe for ${cpe.name} (${((cpe.progress).toFixed(0))}%)`
         cpeMessage = cpe.message
         cpeStatus = true
     }

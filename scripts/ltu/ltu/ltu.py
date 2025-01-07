@@ -1,3 +1,4 @@
+import errno
 import json
 import os
 import random
@@ -54,9 +55,8 @@ def provision(customer):
             if loop(customer):
                 break
         except OSError as e:
-            if e.errno == 51:
+            if e.errno == errno.EL2HLT or (100 <= e.errno <= 113):
                 print('{"progress": 1, "status":"Unreachable"}')
-            raise e
         except Exception as e:
             traceback.print_exc()
     print('{"progress": 100, "status":"Success"}"')
