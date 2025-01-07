@@ -30,7 +30,6 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                     <Col className="col-12">
                         <Button variant={routerStatus || cpeStatus ? "danger" : "warning"}
                                 className="w-100"
-                                disabled={true}
                                 onClick={() => (routerStatus || cpeStatus) ? clickHandler!("cancel", "everything") : clickHandler!("provision", "everything")}
                         >{(routerStatus || cpeStatus) ? "Cancel everything" : "Provision Everything"}</Button>
                     </Col>
