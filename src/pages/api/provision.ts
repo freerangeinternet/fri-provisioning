@@ -29,19 +29,14 @@ export default function handler(
         if (device === "router" || device === "everything") {
             if (state.router.status === "idle") {
                 provisionRouter(data)
-                return res.status(200).json(state)
-            } else {
-                return res.status(400).json({error: "router provisioning not idle"})
             }
         }
         if (device === "cpe" || device === "everything") {
             if (state.cpe.status === "idle") {
                 provisionCPE(data)
-                return res.status(200).json(state)
-            } else {
-                return res.status(400).json({error: "router provisioning not idle"})
             }
         }
+        return res.status(200).json(state)
     } else if (req.method === "DELETE") {
         const device: ProvisioningDevice = req.query.device as ProvisioningDevice
         try {
@@ -124,7 +119,7 @@ function provisionRouter(data: ProvisioningData) {
                     status: "success",
                     name: state.router.name
                 }
-                printLabel(data, { wifi: true, owner: true })
+                printLabel(data, {wifi: true, owner: true})
             } else {
                 state.router = {
                     status: "error",
@@ -180,7 +175,7 @@ function provisionCPE(data: ProvisioningData) {
                     status: "success",
                     name: state.cpe.name
                 }
-                printLabel(data, { owner: true })
+                printLabel(data, {owner: true})
             } else {
                 state.cpe = {
                     status: "error",
