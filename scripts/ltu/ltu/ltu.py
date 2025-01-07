@@ -56,6 +56,7 @@ def provision(customer):
         except OSError as e:
             if e.errno == 51:
                 print('{"progress": 1, "status":"Unreachable"}')
+            raise e
         except Exception as e:
             traceback.print_exc()
     print('{"progress": 100, "status":"Success"}"')

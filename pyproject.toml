@@ -1,13 +1,13 @@
+
+[tool.poetry]
+package-mode = false
+
 [project]
-name = "fri-provisioning"
-version = "0.1.0"
-description = ""
-authors = [
-    {name = "Alex Drean",email = "a@alex00.com"}
-]
-readme = "README.md"
-requires-python = ">=3.13"
+name = "ltu"
+requires-python = ">=3.10"
 dependencies = [
+    "scp",
+    "geographiclib",
 ]
 
 

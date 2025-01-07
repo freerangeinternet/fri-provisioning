@@ -75,7 +75,7 @@ function cancelProvisioning(device: ProvisioningDevice) {
         _routerProcess?.kill("SIGINT")
     }
     if (cpe) {
-        state.cpe = {status: "idle"}
+        _cpeProcess?.kill("SIGINT")
     }
 }
 
@@ -144,7 +144,7 @@ function provisionCPE(data: ProvisioningData) {
         name: data.hostname,
         message: "Starting process...",
     }
-    _cpeProcess = spawn(os.homedir() + '/.local/bin/poetry', ['run', 'python', 'main.py', data.hostname, data.lat + "", data.lon + ""], {
+    _cpeProcess = spawn(os.homedir() + '/.local/bin/poetry', ['run', 'python', '-u', 'main.py', data.hostname, data.lat + "", data.lon + ""], {
         cwd: process.cwd() + '/scripts/ltu'
     })
     _cpeProcess.stderr.pipe(process.stderr);
@@ -154,7 +154,6 @@ function provisionCPE(data: ProvisioningData) {
     });
     console.log('spawned')
     rl.on('line', (line) => {
-        console.log(line, state.cpe.status)
         try {
             if (state.cpe.status === "provisioning") {
                 const data = JSON.parse(line)

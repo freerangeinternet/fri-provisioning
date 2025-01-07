@@ -25,17 +25,17 @@ const ProvisioningStatus: React.FC<ProvisioningStatusProps> = ({
         clearStatus("cpe").then(s => setProvisioningState!(s))
     }
 
-    return [getPopup(router, clearRouter), getPopup(cpe, clearCPE)]
+    return [getPopup(router, clearRouter, "Router"), getPopup(cpe, clearCPE, "CPE")]
 }
 
-function getPopup(state: CPEProvisioningState | RouterProvisioningState, clearCallback: () => void) {
+function getPopup(state: CPEProvisioningState | RouterProvisioningState, clearCallback: () => void, name: string) {
     if (state.status === "success" || state.status === "error") {
         const success = state.status === "success"
         return (
             <>
                 <Alert variant={success ? "success" : "danger"} className={"alert-dismissible"}>
                     {success ?
-                        <>Router provisioned for <strong>{state.name}</strong></> :
+                        <>{name} provisioned for <strong>{state.name}</strong></> :
                         [
                             <>Error provisioning router for <strong>{state.name}</strong></>,
                             renderError(state.error),
