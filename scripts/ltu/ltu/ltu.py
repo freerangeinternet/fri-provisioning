@@ -55,7 +55,7 @@ def provision(customer):
             if loop(customer):
                 break
         except OSError as e:
-            if e.errno == errno.EL2HLT or (100 <= e.errno <= 113):
+            if e.errno == 51:
                 print('{"progress": 1, "status":"Unreachable"}')
         except Exception as e:
             traceback.print_exc()
