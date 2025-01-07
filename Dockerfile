@@ -13,6 +13,11 @@ RUN npm test
 
 WORKDIR /usr/src/app/scripts/tplink
 RUN npm install
+
+WORKDIR /usr/src/app/scripts/ltu
+RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN /root/.local/bin/poetry install
+
 WORKDIR /usr/src/app
 
 ENV PORT_WEBAPP=7200

@@ -47,7 +47,6 @@ const ProvisioningMainMenu: React.FC<ProvisioningMainMenuProps> = ({provisioning
                         <Button
                             variant={cpeStatus ? "danger" : "primary"}
                             className="w-100"
-                            disabled={true}
                             onClick={() => (cpeStatus) ? clickHandler!("cancel", "cpe") : clickHandler!("provision", "cpe")}
                         >{(cpeStatus ? "Cancel CPE" : "Provision CPE")}</Button>
                     </Col>

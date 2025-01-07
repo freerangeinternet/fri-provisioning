@@ -32,8 +32,14 @@ export default function handler(
             } else {
                 return res.status(400).json({error: "router provisioning not idle"})
             }
-        } else {
-            return res.status(400).json({error: "Not implemented"})
+        }
+        if (device === "cpe" || device === "everything") {
+            if (state.cpe.status === "idle") {
+                provisionCPE(data)
+                return res.status(200).json(state)
+            } else {
+                return res.status(400).json({error: "router provisioning not idle"})
+            }
         }
     } else if (req.method === "DELETE") {
         const device: ProvisioningDevice = req.query.device as ProvisioningDevice
@@ -56,7 +62,8 @@ export let state: ProvisioningState = {
         status: "idle"
     }
 }
-let _provisioningProcess: ChildProcessWithoutNullStreams | undefined
+let _routerProcess: ChildProcessWithoutNullStreams | undefined
+let _cpeProcess: ChildProcessWithoutNullStreams | undefined
 
 function cancelProvisioning(device: ProvisioningDevice) {
     const cpe = device === "cpe" || device === "everything"
@@ -64,7 +71,7 @@ function cancelProvisioning(device: ProvisioningDevice) {
     if (cpe && state.cpe.status !== "provisioning") throw new Error("cpe not provisioning")
     if (router && state.router.status !== "provisioning") throw new Error("router not provisioning")
     if (router) {
-        _provisioningProcess?.kill("SIGINT")
+        _routerProcess?.kill("SIGINT")
     }
     if (cpe) {
         state.cpe = {status: "idle"}
@@ -79,12 +86,12 @@ function provisionRouter(data: ProvisioningData) {
         name: data.hostname,
         message: "Starting process...",
     }
-    _provisioningProcess = spawn('npm', ['start', data.hostname, data.ssid, data.psk], {
+    _routerProcess = spawn('npm', ['start', data.hostname, data.ssid, data.psk], {
         cwd: process.cwd() + '/scripts/tplink'
     })
-    _provisioningProcess.stderr.pipe(process.stderr);
+    _routerProcess.stderr.pipe(process.stderr);
     const rl = readline.createInterface({
-        input: _provisioningProcess.stdout,
+        input: _routerProcess.stdout,
         crlfDelay: Infinity,
     });
     let i = 0;
@@ -103,13 +110,13 @@ function provisionRouter(data: ProvisioningData) {
                 }
             }
         } catch (e) {
-            console.error("Cannot JSON.parse() tplink process output:", "'" + line + "'")
+            console.error("Cannot JSON.parse() router process output:", "'" + line + "'")
             // @ts-ignore
             console.error(e.message || e)
         }
     })
-    _provisioningProcess.on('close', (code: number, signal: string | null) => {
-        _provisioningProcess = undefined
+    _routerProcess.on('close', (code: number, signal: string | null) => {
+        _routerProcess = undefined
         if (state.router.status === 'provisioning') {
             if (code === 0) {
                 state.router = {
@@ -121,6 +128,63 @@ function provisionRouter(data: ProvisioningData) {
                 state.router = {
                     status: "error",
                     name: state.router.name,
+                    error: `unknown error: ${code}${signal ? `, signal: ${signal}` : ''}`
+                }
+            }
+        }
+    })
+}
+
+function provisionCPE(data: ProvisioningData) {
+    if (state.cpe.status !== "idle") throw new Error("router not idle")
+    state.cpe = {
+        status: "provisioning",
+        progress: 0,
+        name: data.hostname,
+        message: "Starting process...",
+    }
+    _cpeProcess = spawn('/root/.local/bin/poetry', ['run', 'python', 'main.py', data.hostname, data.lat + "", data.lon + ""], {
+        cwd: process.cwd() + '/scripts/ltu'
+    })
+    _cpeProcess.stderr.pipe(process.stderr);
+    const rl = readline.createInterface({
+        input: _cpeProcess.stdout,
+        crlfDelay: Infinity,
+    });
+    console.log('spawned')
+    rl.on('line', (line) => {
+        console.log(line, state.cpe.status)
+        try {
+            if (state.cpe.status === "provisioning") {
+                const data = JSON.parse(line)
+                const {progress, status, error, screenshot} = data
+                if (progress !== undefined) state.cpe.progress = progress
+                if (status !== undefined) state.cpe.message = status
+                if (error !== undefined) state.cpe = {
+                    status: "error",
+                    name: state.cpe.name,
+                    error: {error, screenshot},
+                }
+            }
+        } catch (e) {
+            console.error("Cannot JSON.parse() cpe process output:", "'" + line + "'")
+            // @ts-ignore
+            console.error(e.message || e)
+        }
+    })
+    _cpeProcess.on('close', (code: number, signal: string | null) => {
+        _cpeProcess = undefined
+        if (state.cpe.status === 'provisioning') {
+            if (code === 0) {
+                state.cpe = {
+                    status: "success",
+                    name: state.cpe.name
+                }
+                printLabel(data, { owner: true })
+            } else {
+                state.cpe = {
+                    status: "error",
+                    name: state.cpe.name,
                     error: `unknown error: ${code}${signal ? `, signal: ${signal}` : ''}`
                 }
             }
