@@ -59,7 +59,7 @@ export function checkProvisioningData(data: ProvisioningData | any): Provisionin
     if (typeof data.lon !== "number") {
         if (typeof data.lon !== "string")
             return false
-        data.lat = Number.parseFloat(data.lon)
+        data.lon = Number.parseFloat(data.lon)
         if (Number.isNaN(data.lon))
             return false
     }
