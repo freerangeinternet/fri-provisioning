@@ -1,4 +1,4 @@
-import {Browser, chromium, Page} from "playwright";
+import {chromium, Page} from "playwright";
 import {assertNotCancelled, status, statusError} from "./main";
 import * as fs from "node:fs";
 
@@ -198,8 +198,11 @@ async function upgrade(page: Page) {
         }), sleep(180)]);
         return true
     }
-    await toggleRadioButtonTo(page, "div_autoUpgradeBtn", true)
     await sleep(1)
+    if (await page.isVisible("div_autoUpgradeBtn")) {
+        await toggleRadioButtonTo(page, "div_autoUpgradeBtn", true)
+        await sleep(1)
+    }
     return false
 }
 
