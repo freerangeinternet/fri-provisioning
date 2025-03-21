@@ -14,33 +14,28 @@ import traceback
 
 from ltu import devices
 
-
 BASESTATION = [32.365479, -112.878797]
 DEFAULT_BEARING = 40
 SECTORS = [
-    ["360",    -15, 10, 5265, 30],
-    ["005-LR",   2.5, 7.5, 5485, 30],  # 5
-
-    ["010-LR",  7.5,  12.5, 5590, 40],
-    ["015-LR", 12.5, 17.5, 5535, 30],
-
-    ["020",     10, 30, 5300, 30],
-    ["021",     10, 30, 5520, 30],
-    ["020-LR",  17.5, 25, 5625, 30],
-
-    ["030-LR",  25, 35, 5660, 30],
-
-    ["041",     30, 50, 5555, 30],
-    ["040-LR",  35, 42.5, 5590, 30],
-
-    ["045-LR", 42.5, 47.5, 5535, 30],
-    ["050-LR", 47.5, 55, 5625, 30],
-
-    ["060",     50, 70, 5265, 30],
-    ["060-LR",  55, 65, 5660, 30],
-
-    ["080",     70, 90, 5695, 30],
-    ["130",     100, 160, 5290, 80],
+    ["FRI-353", 345, 357, 5490, 40],
+    ["FRI-360", 357, 3, 5325, 50],
+    ["FRI-005", 3, 5.5, 5695, 50],
+    ["FRI-007", 5.5, 8, 5610, 40],
+    ["FRI-008", 8, 10, 5530, 40],
+    ["FRI-010", 10, 13, 5650, 40],
+    ["FRI-015", 13, 19, 5570, 40],
+    ["FRI-024", 19, 27, 5490, 40],
+    ["FRI-030", 27, 32, 5325, 50],
+    ["FRI-035", 32, 36, 5695, 50],
+    ["FRI-038", 36, 40, 5610, 40],
+    ["FRI-041", 40, 42, 5530, 40],
+    ["FRI-044", 42, 45, 5650, 40],
+    ["FRI-045", 45, 50, 5570, 40],
+    ["FRI-055", 50, 55, 5490, 40],
+    ["FRI-060", 55, 63, 5325, 50],
+    ["FRI-065", 63, 70, 5275, 50],
+    ["FRI-075", 70, 85, 5610, 40],
+    ["FRI-130", 123, 137, 5290, 80],
 ]
 LTU_VERSION = {
     "afltu": "v2.3.4"
@@ -64,7 +59,7 @@ def provision(customer):
 
 def upgrade(ssh, scp_client, platform, version):
     pv = platform + "." + version
-    print(json.dumps({"progress": 55, "status":"Upgrade to " + pv}))
+    print(json.dumps({"progress": 55, "status": "Upgrade to " + pv}))
     scp_client.put("firmware/" + pv + ".bin", "/tmp/fwupdate.bin")
     print(json.dumps({"progress": 65, "status": "Upload complete, upgrading..."}))
     exe(ssh, "/sbin/fwupdate -m")
@@ -182,14 +177,14 @@ def edit_config(config, customer):
         hostname = customer["hostname"]
 
     [sector, freq, bw] = get_sector(bearing)
-    print("[LTU] FRI-" + str(sector), freq, bw, file=sys.stderr)
+    print("[LTU] " + str(sector), freq, bw, file=sys.stderr)
 
     config["resolv.host.1.name"] = "LTU-" + hostname
     config["radio.1.chanbw"] = str(bw)
     config["radio.1.freq"] = str(freq)
     config["radio.1.rxfreq"] = str(freq)
     config["radio.1.txfreq"] = str(freq)
-    config["wireless.1.ssid"] = "FRI-" + sector
+    config["wireless.1.ssid"] = sector
     config["wireless.1.security"] = "WPA2-PSK"
     config["wireless.1.security.psk"] = "free range javelinas"
     config["users.1.name"] = "ubnt"
@@ -205,13 +200,15 @@ def edit_config(config, customer):
     config["system.latitude"] = _lat
     config["system.longitude"] = _lon
     config["unms.status"] = "enabled"
-    config["unms.uri"] = "wss://uisp.ajowifi.net:443+WooA7xNFeqw8AY5c5ACnB5VWJQWEf8qdOgL5NOfE23ubCPNB+allowSelfSignedCertificate"
+    config[
+        "unms.uri"] = "wss://uisp.ajowifi.net:443+WooA7xNFeqw8AY5c5ACnB5VWJQWEf8qdOgL5NOfE23ubCPNB+allowSelfSignedCertificate"
 
 
 def get_bearing(customer):
     coordinates = [customer["lat"], customer["lon"]]
     res = Geodesic.WGS84.Inverse(BASESTATION[0], BASESTATION[1], coordinates[0], coordinates[1])
     return res["azi1"]
+
 
 def get_sector(heading):
     # First find the tightest sector beam
@@ -227,6 +224,7 @@ def get_sector(heading):
     if len(found) > 0:
         return random.choice(found)
 
+
 def get_potential_sectors(heading):
     res = []
     for [sector, h1, h2, freq, bw] in SECTORS:
@@ -236,6 +234,7 @@ def get_potential_sectors(heading):
         if h1 <= heading <= h2:
             res.append(sector)
     return res
+
 
 def load_config():
     with open("system.cfg", "r") as file:
