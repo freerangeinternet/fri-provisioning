@@ -222,7 +222,7 @@ def get_sector(heading):
     # Then find all the sectors that match and have such a tight beam
     found = []
     for [sector, h1, h2, freq, bw] in SECTORS:
-        if h1 <= heading <= h2 and minhdgdelta == (h2 - h1) % 360:
+        if is_heading_between(heading, h1, h2) and minhdgdelta == (h2 - h1) % 360:
             found.append([sector, freq, bw])
     if len(found) > 0:
         return random.choice(found)
