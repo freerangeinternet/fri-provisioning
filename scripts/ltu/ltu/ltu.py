@@ -209,20 +209,25 @@ def get_bearing(customer):
     res = Geodesic.WGS84.Inverse(BASESTATION[0], BASESTATION[1], coordinates[0], coordinates[1])
     return res["azi1"]
 
+def is_heading_between(heading, h1, h2):
+    return (h1 < h2 and h1 <= heading <= h2) or (h2 < h1 and (heading >= h1 or heading <= h2))
 
 def get_sector(heading):
     # First find the tightest sector beam
     minhdgdelta = 360
     for [sector, h1, h2, freq, bw] in SECTORS:
-        if h1 <= heading <= h2:
-            minhdgdelta = min(minhdgdelta, h2 - h1)
+        delta = (h2 - h1) % 360
+        if is_heading_between(heading, h1, h2) and delta < minhdgdelta:
+            minhdgdelta = delta
     # Then find all the sectors that match and have such a tight beam
     found = []
     for [sector, h1, h2, freq, bw] in SECTORS:
-        if h1 <= heading <= h2 and minhdgdelta == h2 - h1:
+        if h1 <= heading <= h2 and minhdgdelta == (h2 - h1) % 360:
             found.append([sector, freq, bw])
     if len(found) > 0:
         return random.choice(found)
+    else:
+        print('{"progress": 0, "status":"NO SECTOR FOUND"}')
 
 
 def get_potential_sectors(heading):
